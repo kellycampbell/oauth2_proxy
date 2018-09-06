@@ -10,11 +10,18 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/Sirupsen/logrus"
 	"github.com/mreiferson/go-options"
+)
+
+var (
+	logger *logrus.Entry
 )
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	logger = logrus.StandardLogger().WithFields(logrus.Fields{})
+
 	flagSet := flag.NewFlagSet("oauth2_proxy", flag.ExitOnError)
 
 	emailDomains := StringArray{}
@@ -126,9 +133,12 @@ func main() {
 		}
 	}
 
+	var httpServerLogger = log.New(logger.WriterLevel(logrus.DebugLevel), "", 0)
+
 	s := &Server{
-		Handler: LoggingHandler(os.Stdout, oauthproxy, opts.RequestLogging, opts.RequestLoggingFormat),
-		Opts:    opts,
+		Handler:  LoggingHandler(os.Stdout, oauthproxy, opts.RequestLogging, opts.RequestLoggingFormat),
+		Opts:     opts,
+		ErrorLog: httpServerLogger,
 	}
 	s.ListenAndServe()
 }

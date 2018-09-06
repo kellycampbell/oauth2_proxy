@@ -1,19 +1,9 @@
-FROM golang:1.11-stretch
-
-WORKDIR /go
-
-RUN go get -d -v github.com/bitly/oauth2_proxy
-RUN go install -v github.com/bitly/oauth2_proxy
-
-CMD ["oauth2_proxy"]
-
-# Multi-stage build setup 
 
 # Stage 1 (to create a "build" image, ~850MB)
 FROM golang:1.11 AS builder
 RUN go version
 
-RUN go get -v github.com/bitly/oauth2_proxy
+RUN go get github.com/bitly/oauth2_proxy
 
 WORKDIR /go/src/github.com/bitly/oauth2_proxy/
 COPY . /go/src/github.com/bitly/oauth2_proxy/
